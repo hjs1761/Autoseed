@@ -1,0 +1,28 @@
+{
+    "name": "influencer/solution",
+    "description": "인플루언서 데이터 관리 솔루션",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        },
+        "files": [
+            "include/common.php",
+            "config/define.php",
+            "include/crypto.php"
+        ]
+    },
+    "authors": [
+        {
+            "name": "Influencer Solution Team",
+            "email": "info@influencer-solution.com"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^5.6",
+        "monolog/monolog": "^3.8",
+        "ext-pdo": "*",
+        "ext-mbstring": "*",
+        "symfony/http-foundation": "^5.4",
+        "nikic/fast-route": "^1.3"
+    }
+}

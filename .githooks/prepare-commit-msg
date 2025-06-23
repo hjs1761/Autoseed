@@ -1,0 +1,56 @@
+#!/bin/sh
+
+# 날짜 정보 가져오기 (YYYYMMDD 형식)
+DATE=$(date +%Y%m%d)
+
+# 현재 사용자 이름 가져오기
+USER=$(git config user.name)
+
+# 커밋 메시지 파일과 소스 타입
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+
+# 자동 생성된 커밋이 아닐 경우에만 적용 (merge, squash 등 제외)
+if [ -z "$COMMIT_SOURCE" ] || [ "$COMMIT_SOURCE" = "message" ]; then
+  # 현재 스테이지된 파일 목록 가져오기
+  STAGED_FILES=$(git diff --cached --name-only)
+  
+  # 파일 유형 분류
+  PHP_FILES=0
+  JS_FILES=0
+  CSS_FILES=0
+  DOC_FILES=0
+  
+  # 스테이지된 파일 유형 확인
+  for FILE in $STAGED_FILES; do
+    if [[ "$FILE" == *.php ]]; then
+      PHP_FILES=1
+    elif [[ "$FILE" == *.js ]]; then
+      JS_FILES=1
+    elif [[ "$FILE" == *.css ]]; then
+      CSS_FILES=1
+    elif [[ "$FILE" == *.md || "$FILE" == "README"* || "$FILE" == "*/docs/*" ]]; then
+      DOC_FILES=1
+    fi
+  done
+  
+  # 원래 커밋 메시지 저장
+  ORIGINAL_MSG=$(cat "$COMMIT_MSG_FILE")
+  
+  # 파일 유형에 따라 접두사 결정
+  PREFIX=""
+  if [ $DOC_FILES -eq 1 ] && [ $PHP_FILES -eq 0 ] && [ $JS_FILES -eq 0 ] && [ $CSS_FILES -eq 0 ]; then
+    PREFIX="[Docs]"
+  elif [ $PHP_FILES -eq 1 ]; then
+    PREFIX="[Backend]"
+  elif [ $JS_FILES -eq 1 ] || [ $CSS_FILES -eq 1 ]; then
+    PREFIX="[Frontend]"
+  fi
+  
+  # 최종 커밋 메시지 생성
+  if [ -n "$PREFIX" ]; then
+    echo "$DATE [$USER] $PREFIX $ORIGINAL_MSG" > "$COMMIT_MSG_FILE"
+  else
+    echo "$DATE [$USER] $ORIGINAL_MSG" > "$COMMIT_MSG_FILE"
+  fi
+fi 

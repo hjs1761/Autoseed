@@ -1,0 +1,21 @@
+# 디렉토리 인덱싱 비활성화
+Options -Indexes
+
+# 권한 설정
+<IfModule mod_authz_core.c>
+    Require all granted
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Allow from all
+</IfModule>
+
+# URL 리라이팅 설정
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # 실제 파일/폴더가 존재하지 않을 경우 index.php로 전달
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^.*$ index.php [QSA,L]
+</IfModule>

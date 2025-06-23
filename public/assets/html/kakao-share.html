@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>Kakao Commerce Share</title>
+
+  <!-- Kakao JavaScript SDK -->
+  <script src="https://developers.kakao.com/sdk/js/kakao.min.js"></script>
+
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font: 16px/1.4 system-ui;
+      margin: 0;
+      text-align: center;
+    }
+    .loading {
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="loading">공유 준비 중...</div>
+
+  <script>
+    /**
+     * 카카오 커머스 공유 기능
+     * 상품 정보와 가격을 포함한 카카오톡 공유 기능을 제공합니다.
+     */
+
+    /* 1. SDK 초기화 */
+    Kakao.init('6b711b9da95847ae14bd5ee043cc44db');   // 🔸실제 JS 키로 교체
+
+    /* 2. URL 파라미터 파싱 */
+    /**
+     * 예상 쿼리 형식:
+     * kakao-share.html?u=ENCODED_URL&t=ENCODED_TITLE&i=ENCODED_IMG&rp=10000&dp=8000&dr=20
+     * - u: 공유 URL (인코딩됨)
+     * - t: 제목 (인코딩됨)
+     * - i: 이미지 URL (인코딩됨)
+     * - rp: 정가(regularPrice)
+     * - dp: 할인가(discountPrice)
+     * - dr: 할인율(discountRate, %)
+     */
+    const params = new URLSearchParams(location.search);
+
+    const url = decodeURIComponent(params.get('u') || location.origin);
+    const title = decodeURIComponent(params.get('t') || '공동구매 이벤트');
+    const imageUrl = decodeURIComponent(params.get('i') || '');
+
+	const link = 'https://app.weaverloft.com/group_buying/assets/html/redirect.html?url=' + encodeURIComponent(url);
+    
+    let regularPrice = parseInt(params.get('rp'), 10) || 0;
+    let discountPrice = parseInt(params.get('dp'), 10) || 0;
+    let discountRate = parseInt(params.get('dr'), 10) || 0;
+
+    /* 3. (옵션) opener에서 데이터 보강 */
+    // 같은 도메인일 경우 opener에서 .gb-* 클래스를 가진 요소에서 데이터를 추출
+    try {
+      if (window.opener && window.opener.document) {
+        const $ = window.opener.document.querySelector.bind(window.opener.document);
+
+        if (!regularPrice) {
+          const priceText = $('.gb-original-price')?.textContent;
+          regularPrice = priceText ? parseInt(priceText.replace(/[^0-9]/g, ''), 10) : 0;
+        }
+        
+        if (!discountPrice) {
+          const priceText = $('.gb-discount-price')?.textContent;
+          discountPrice = priceText ? parseInt(priceText.replace(/[^0-9]/g, ''), 10) : 0;
+        }
+        
+        if (!discountRate) {
+          const rateText = $('.gb-discount-rate')?.textContent;
+          discountRate = rateText ? parseInt(rateText.replace(/[^0-9]/g, ''), 10) : 0;
+        }
+      }
+    } catch (e) {
+      console.warn('opener 접근 실패 (교차 도메인일 가능성 있음)');
+    }
+
+    /* 4. 카카오톡 공유 실행 */
+    (async () => {
+      try {
+        await Kakao.Share.sendDefault({
+          objectType: 'commerce',
+          content: {
+            title,
+            description: '공동구매 특별 가격으로 구매하세요!',
+            imageUrl,
+            link: { 
+              mobileWebUrl: link, 
+              webUrl: link 
+            }
+          },
+          commerce: {
+            productName: title,
+            regularPrice,
+            discountRate,
+            discountPrice
+          },
+          buttons: [{
+            title: '공동구매 참여하기',
+            link: { 
+              mobileWebUrl: link, 
+              webUrl: link 
+            }
+          }]
+        });
+      } catch (e) {
+        console.error('카카오 공유 실패:', e);
+        alert('공유 중 오류가 발생했습니다. URL이 복사되었습니다.');
+        navigator.clipboard.writeText(link);
+      } finally {
+        window.close();   // 성공 또는 실패 후 팝업 닫기
+      }
+    })();
+  </script>
+</body>
+</html>

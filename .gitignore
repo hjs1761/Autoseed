@@ -1,0 +1,54 @@
+# IDE/에디터 파일
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# OS 파일
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 의존성 디렉토리
+/vendor/
+/node_modules/
+
+# 환경 설정 파일
+.env
+.env.backup
+*.env.*
+!.env.example
+
+# 캐시 및 로그 파일
+/storage/*.log
+/storage/logs/*
+/storage/cache/*
+!/storage/logs/.gitkeep
+!/storage/cache/.gitkeep
+.phpunit.result.cache
+npm-debug.log
+yarn-error.log
+
+# 컴파일된 파일
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.pyc
+*.pyo
+
+# 민감한 정보
+*.key
+*.pem
+*.p12
+*.pfx
+*.cer
+*.crt
+
+# 백업 파일
+*.bak
+*.swp
+*~
+*.old 
